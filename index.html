@@ -6,7 +6,7 @@
 <title>Calculadora dos Pragados</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Pirata+One&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@200;300;400;500;700&family=Pirata+One&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <style>
 @font-face {
     font-family: 'Gothic War';
@@ -38,10 +38,67 @@
             radial-gradient(ellipse at top, #1a1a1a 0%, var(--bg) 45%, var(--bg-vignette) 100%);
         color: var(--text);
         font-family: 'Oswald', Arial, sans-serif;
+        font-weight: 300;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 28px 16px 60px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* ---------- Splash Intro Screen ---------- */
+    #intro-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--bg);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #intro-screen.fade-out {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .intro-title {
+        font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', 'Oswald', sans-serif;
+        font-weight: 100;
+        font-size: clamp(32px, 6vw, 64px);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text);
+        margin-bottom: 30px;
+        text-align: center;
+        text-shadow: 0 0 20px rgba(255,255,255,0.15);
+    }
+
+    .intro-title span {
+        font-weight: 100;
+        color: var(--amber-dim);
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        border-top-color: var(--amber-dim);
+        border-radius: 50%;
+        animation: spin 1.2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     /* ---------- Masthead ---------- */
@@ -56,12 +113,13 @@
         font-family: 'JetBrains Mono', monospace;
         letter-spacing: 0.35em;
         font-size: 11px;
+        font-weight: 300;
         color: var(--amber-dim);
         text-transform: uppercase;
     }
     .masthead h1 {
         font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', 'Oswald', sans-serif;
-        font-weight: 700;
+        font-weight: 200;
         font-size: 40px;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -69,9 +127,10 @@
         color: var(--text);
         text-shadow: 0 0 18px rgba(255,255,255,0.12);
     }
-    .masthead h1 span { color: var(--amber); }
+    .masthead h1 span { color: var(--amber); font-weight: 300; }
     .masthead .sub {
         font-family: 'JetBrains Mono', monospace;
+        font-weight: 300;
         font-size: 12px;
         color: var(--text-muted);
         letter-spacing: 0.08em;
@@ -80,7 +139,7 @@
         content: "";
         display: block;
         width: 120px;
-        height: 2px;
+        height: 1px;
         margin: 16px auto 0;
         background: linear-gradient(90deg, transparent, var(--amber-dim), transparent);
     }
@@ -110,8 +169,8 @@
         font-size: 13px;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        font-weight: 500;
-        transition: all 0.2s ease;
+        font-weight: 300;
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease;
         position: relative;
         white-space: nowrap;
     }
@@ -127,23 +186,40 @@
         justify-content: center;
         font-family: 'JetBrains Mono', monospace;
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 400;
         flex-shrink: 0;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    
     .tab:hover {
         color: var(--text);
         border-color: var(--amber-dim);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
+    
+    .tab:hover .badge {
+        transform: scale(1.05);
+    }
+
+    .tab:active {
+        transform: scale(0.98) translateY(0);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     .tab.active {
         background-color: var(--panel-alt);
         border-color: var(--amber);
         color: var(--amber);
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.10) inset;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 6px 20px rgba(0,0,0,0.5);
+        font-weight: 400;
     }
 
     /* ---------- Panel / content ---------- */
     .content {
         display: none;
+        opacity: 0;
+        transform: translateY(16px) scale(0.985);
         flex-direction: column;
         gap: 16px;
         width: 100%;
@@ -153,8 +229,14 @@
         border: 1px solid var(--border);
         border-radius: 6px;
         box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .content.active { display: flex; }
+    
+    .content.active {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 
     label {
         display: block;
@@ -162,8 +244,9 @@
         font-size: 12px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        font-weight: 500;
+        font-weight: 300;
         color: var(--amber-dim);
+        transition: color 0.4s ease;
     }
 
     input, select, button {
@@ -175,29 +258,30 @@
         background-color: var(--panel-alt);
         color: var(--text);
         font-family: 'JetBrains Mono', monospace;
+        font-weight: 300;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     
     select {
         font-family: 'Oswald', Arial, sans-serif;
+        font-weight: 300;
         cursor: pointer;
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
         background-repeat: no-repeat;
         background-position: right 14px center;
         background-size: 16px 16px;
         padding-right: 40px;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        font-weight: 500;
-        transition: all 0.25s ease;
     }
 
     select:hover {
         border-color: var(--amber-dim);
         background-color: #262626;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     select option {
@@ -205,13 +289,15 @@
         color: var(--text);
         padding: 10px;
         font-family: 'Oswald', Arial, sans-serif;
+        font-weight: 300;
         font-size: 14px;
     }
 
     input:focus, select:focus {
         outline: none;
         border-color: var(--amber);
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.10);
+        box-shadow: 0 0 0 2px rgba(255,255,255,0.08), 0 4px 15px rgba(0,0,0,0.4);
+        transform: translateY(-1px);
     }
 
     button {
@@ -219,15 +305,27 @@
         background-color: var(--amber);
         color: #080808;
         cursor: pointer;
-        font-weight: 700;
+        font-weight: 400;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         font-size: 14px;
         border: none;
-        transition: background-color 0.2s ease, transform 0.05s ease;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    button:hover { background-color: #dddddd; }
-    button:active { transform: scale(0.99); }
+    
+    button:hover {
+        background-color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+    }
+    
+    button:active {
+        transform: translateY(0) scale(0.98);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
+    }
 
     /* ---------- Manifest / result ---------- */
     .result {
@@ -239,11 +337,25 @@
         border: 1px dashed var(--border);
         min-height: 24px;
         font-family: 'JetBrains Mono', monospace;
+        font-weight: 300;
         font-size: 14px;
         line-height: 1.9;
         color: var(--text);
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease;
     }
-    .result:empty { display: none; }
+    
+    .result.show-anim {
+        opacity: 1;
+        transform: translateY(0);
+        border-color: var(--amber-dim);
+    }
+    
+    .result:empty { 
+        display: none; 
+    }
+    
     .result::before {
         content: "MANIFESTO";
         position: absolute;
@@ -252,109 +364,88 @@
         background: var(--panel);
         padding: 0 8px;
         font-size: 10px;
+        font-weight: 300;
         letter-spacing: 0.25em;
         color: var(--amber-dim);
+        transition: color 0.4s ease;
     }
+    
     .result strong {
         color: var(--amber);
         font-family: 'Oswald', Arial, sans-serif;
-        font-weight: 600;
+        font-weight: 400;
         letter-spacing: 0.03em;
         display: block;
         margin-bottom: 8px;
         font-size: 13px;
         text-transform: uppercase;
     }
+    
     .material-composto {
         color: var(--text-muted);
         font-size: 0.85em;
         display: block;
         margin: 2px 0 6px 14px;
-        border-left: 2px solid var(--border);
+        border-left: 1px solid var(--border);
         padding-left: 10px;
-    }
-
-    /* ---------- Animações ---------- */
-    @keyframes fadeInSlide {
-        from {
-            opacity: 0;
-            transform: translateY(12px) scale(0.98);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    @keyframes resultPop {
-        from {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes pulseGlow {
-        0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
-        50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
-        100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
-    }
-
-    .content.active {
-        display: flex;
-        animation: fadeInSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .tab {
-        transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-    .tab:hover {
-        transform: translateY(-2px);
-    }
-    .tab.active {
-        animation: pulseGlow 3s infinite ease-in-out;
-    }
-
-    button {
-        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 255, 255, 0.15);
-    }
-    button:active {
-        transform: translateY(0) scale(0.98);
-    }
-
-    .result.show-anim {
-        animation: resultPop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        transition: all 0.4s ease;
     }
 
     .author-tag {
         font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', sans-serif;
+        font-weight: 200;
         font-size: 18px;
         color: var(--amber-dim);
         letter-spacing: 0.08em;
         text-transform: uppercase;
         margin-top: 14px;
         opacity: 0.85;
-        text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        text-shadow: 0 0 10px rgba(255,255,255,0.08);
+        transition: opacity 0.4s ease, text-shadow 0.4s ease;
+    }
+    
+    .author-tag:hover {
+        opacity: 1;
+        text-shadow: 0 0 15px rgba(255,255,255,0.2);
     }
 
-    body {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
+    /* ---------- YouTube Bottom Left Link ---------- */
+    .yt-link {
+        position: fixed;
+        bottom: 16px;
+        left: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 300;
+        color: var(--text-muted);
+        text-decoration: none;
+        letter-spacing: 0.08em;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background-color: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .yt-link:hover {
+        color: var(--amber);
+        border-color: var(--amber-dim);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
 </style>
 </head>
 <body>
+
+<!-- Intro Screen -->
+<div id="intro-screen">
+    <div class="intro-title">calculadora <span>dos pragados</span></div>
+    <div class="spinner"></div>
+</div>
 
 <div class="masthead">
     <h1>calculadora <span>dos pragados</span></h1>
@@ -367,8 +458,7 @@
     <div class="tab" onclick="openTab(1)"><span class="badge">C</span>Coletes</div>
     <div class="tab" onclick="openTab(2)"><span class="badge">BP</span>Blueprints</div>
     <div class="tab" onclick="openTab(3)"><span class="badge">AT</span>Attachs</div>
-    <div class="tab" onclick="openTab(4)"><span class="badge">AR</span>Armas</div>
-    <div class="tab" onclick="openTab(5)"><span class="badge">INV</span>Inventário</div>
+    <div class="tab" onclick="openTab(4)" style="flex: 1 1 100%;"><span class="badge">INV</span>Inventário</div>
 </div>
 
 <!-- Tab 0: Balas -->
@@ -455,24 +545,8 @@
     <div class="result" id="resultadoAttach"></div>
 </div>
 
-<!-- Tab 4: Armas -->
+<!-- Tab 4: Crafts Inventário -->
 <div class="content" id="tab-4">
-    <div>
-        <label for="tipoArma">Arma</label>
-        <select id="tipoArma">
-            <option value="Model29">Model 29</option>
-        </select>
-    </div>
-    <div>
-        <label for="quantidadeArma">Quantidade</label>
-        <input id="quantidadeArma" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularArmas()">Calcular</button>
-    <div class="result" id="resultadoArmas"></div>
-</div>
-
-<!-- Tab 5: Crafts Inventário -->
-<div class="content" id="tab-5">
     <div>
         <label for="tipoInventario">Item de Inventário</label>
         <select id="tipoInventario">
@@ -491,7 +565,20 @@
     <div class="result" id="resultadoInventario"></div>
 </div>
 
+<!-- YouTube Bottom Left Link -->
+<a href="https://www.youtube.com/@zauzxx" target="_blank" class="yt-link">YouTube: @zauzxx</a>
+
 <script>
+    // Hide intro screen after delay
+    window.addEventListener("load", () => {
+        setTimeout(() => {
+            const intro = document.getElementById("intro-screen");
+            if (intro) {
+                intro.classList.add("fade-out");
+            }
+        }, 1800);
+    });
+
     function formatarNumero(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
@@ -521,11 +608,42 @@
     }
 
     function openTab(index) {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
-        document.querySelectorAll(".tab")[index].classList.add("active");
-        document.querySelectorAll(".content")[index].classList.add("active");
+        const tabs = document.querySelectorAll(".tab");
+        const contents = document.querySelectorAll(".content");
+        
+        if (tabs[index].classList.contains("active")) return;
+
+        tabs.forEach(t => t.classList.remove("active"));
+        
+        // Hide currently active content with smooth transition
+        const currentActiveContent = document.querySelector(".content.active");
+        if (currentActiveContent) {
+            currentActiveContent.classList.remove("active");
+            setTimeout(() => {
+                contents.forEach(c => c.style.display = "none");
+                contents[index].style.display = "flex";
+                void contents[index].offsetWidth;
+                contents[index].classList.add("active");
+            }, 350);
+        } else {
+            contents[index].style.display = "flex";
+            void contents[index].offsetWidth;
+            contents[index].classList.add("active");
+        }
+        
+        tabs[index].classList.add("active");
     }
+
+    // Initialize display states properly on load
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll(".content").forEach((c, idx) => {
+            if (!c.classList.contains("active")) {
+                c.style.display = "none";
+            } else {
+                c.style.display = "flex";
+            }
+        });
+    });
 
     function calcularBalas() {
         const tipo = document.getElementById("tipoBala").value;
@@ -619,46 +737,6 @@
         res_resultadoBlueprint.classList.add("show-anim");
     }
 
-    const materiaisArmas = {
-        Model29: {
-            nome: "Model 29", peso: 2500,
-            materiais: { "Borracha": 4, "Aço": 4, "Barra de Ferro": 4 },
-            dinheiro: 50000
-        }
-    };
-
-    function calcularArmas() {
-        const tipo = document.getElementById("tipoArma").value;
-        const qtdDesejada = parseNumber(document.getElementById("quantidadeArma").value);
-        const mat = materiaisArmas[tipo];
-        const resultado = document.getElementById("resultadoArmas");
-
-        if (qtdDesejada <= 0) {
-            resultado.innerHTML = "<strong>Quantidade inválida</strong>Introduza uma quantidade maior que 0.";
-            return;
-        }
-
-        const craftsNecessarios = Math.ceil(qtdDesejada / 2);
-        const quantidadeProduzida = craftsNecessarios * 2;
-        const pesoTotal = quantidadeProduzida * mat.peso;
-
-        let texto = `
-            <strong>Total para ${formatarNumero(quantidadeProduzida)}x ${mat.nome} (${craftsNecessarios} craft${craftsNecessarios > 1 ? 's' : ''})</strong>
-            Peso total: ${formatarPeso(pesoTotal)}<br><br>
-            <strong>Materiais necessários</strong>
-        `;
-
-        for (const [nome, quantidade] of Object.entries(mat.materiais)) {
-            texto += `${formatarNumero(quantidade * craftsNecessarios)}x ${nome}<br>`;
-        }
-
-        if (mat.dinheiro) {
-            texto += `Dinheiro: ${formatarNumero(mat.dinheiro * craftsNecessarios)}<br>`;
-        }
-
-        resultado.innerHTML = texto;
-    }
-
     const materiaisAttachs = {
         LanternaTatical: {
             nome: "Lanterna Tática", peso: 120,
@@ -726,6 +804,9 @@
 
         if (qtdDesejada <= 0) {
             resultado.innerHTML = "<strong>Quantidade inválida</strong>Introduza uma quantidade maior que 0.";
+            resultado.classList.remove("show-anim");
+            void resultado.offsetWidth;
+            resultado.classList.add("show-anim");
             return;
         }
 
@@ -753,6 +834,9 @@
         }
 
         resultado.innerHTML = texto;
+        resultado.classList.remove("show-anim");
+        void resultado.offsetWidth;
+        resultado.classList.add("show-anim");
     }
 
     const materiaisInventario = {
@@ -786,6 +870,9 @@
 
         if (qtdDesejada <= 0) {
             resultado.innerHTML = "<strong>Quantidade inválida</strong>Introduza uma quantidade maior que 0.";
+            resultado.classList.remove("show-anim");
+            void resultado.offsetWidth;
+            resultado.classList.add("show-anim");
             return;
         }
 
@@ -795,7 +882,7 @@
 
         let texto = `
             <strong>Total para ${formatarNumero(quantidadeProduzida)}x ${mat.nome} (${craftsNecessarios} craft${craftsNecessarios > 1 ? 's' : ''})</strong>
-            Peso total: ${formatarPeso(pesoTotal)}<br><br>
+            Peso total: ` + formatarPeso(pesoTotal) + `<br><br>
             <strong>Materiais necessários</strong>
         `;
 
@@ -812,6 +899,9 @@
         }
 
         resultado.innerHTML = texto;
+        resultado.classList.remove("show-anim");
+        void resultado.offsetWidth;
+        resultado.classList.add("show-anim");
     }
 </script>
 
@@ -835,10 +925,6 @@
             return false;
         }
         if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && (e.keyCode === 65 || e.keyCode === 67)) {
             e.preventDefault();
             return false;
         }
