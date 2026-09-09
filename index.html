@@ -739,6 +739,38 @@
 <a href="https://www.youtube.com/@zauzxx" target="_blank" class="yt-link">YouTube: @zauzxx</a>
 
 <script>
+    // Função centralizada para validação da licença com o servidor
+    async function validarEstadoLicenca() {
+        const savedKey = localStorage.getItem('pragado_license');
+        const licenseScreen = document.getElementById('license-screen');
+
+        if (!savedKey) {
+            if (licenseScreen) licenseScreen.classList.remove('fade-out');
+            return false;
+        }
+
+        try {
+            const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: savedKey })
+            });
+            const data = await response.json();
+
+            if (data.valido) {
+                if (licenseScreen) licenseScreen.classList.add('fade-out');
+                return true;
+            } else {
+                localStorage.removeItem('pragado_license');
+                if (licenseScreen) licenseScreen.classList.remove('fade-out');
+                return false;
+            }
+        } catch (e) {
+            console.error("Erro ao verificar chave no servidor:", e);
+            return false;
+        }
+    }
+
     // Sistema de Autenticação por Licença com validação contínua e servidor no Render
     async function verificarChaveLicenca() {
         const key = document.getElementById('license-input').value.trim();
@@ -771,31 +803,17 @@
 
     // Verificação automática ao carregar a página (revogação imediata se mudar para false)
     window.addEventListener("load", async () => {
-        const savedKey = localStorage.getItem('pragado_license');
-        
-        if (savedKey) {
-            try {
-                const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: savedKey })
-                });
-                const data = await response.json();
-
-                if (data.valido) {
-                    document.getElementById('license-screen').classList.add('fade-out');
-                } else {
-                    localStorage.removeItem('pragado_license');
-                }
-            } catch (e) {
-                console.error("Erro ao verificar chave guardada:", e);
-            }
-        }
+        await validarEstadoLicenca();
 
         setTimeout(() => {
             const intro = document.getElementById("intro-screen");
             if (intro) intro.classList.add("fade-out");
         }, 1800);
+
+        // Verificação periódica em segundo plano a cada 5 segundos
+        setInterval(async () => {
+            await validarEstadoLicenca();
+        }, 5000);
     });
 
     let itensAcumuladosGlobal = [];
