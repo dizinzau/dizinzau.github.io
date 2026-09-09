@@ -739,7 +739,7 @@
 <a href="https://www.youtube.com/@zauzxx" target="_blank" class="yt-link">YouTube: @zauzxx</a>
 
 <script>
-    // Função centralizada para validação da licença com o servidor
+    // Função centralizada para validação da licença com o servidor (com refresh automático se recusada)
     async function validarEstadoLicenca() {
         const savedKey = localStorage.getItem('pragado_license');
         const licenseScreen = document.getElementById('license-screen');
@@ -762,7 +762,7 @@
                 return true;
             } else {
                 localStorage.removeItem('pragado_license');
-                if (licenseScreen) licenseScreen.classList.remove('fade-out');
+                location.reload(); // Dá refresh automático para tirar o acesso imediatamente
                 return false;
             }
         } catch (e) {
@@ -801,7 +801,7 @@
         }
     }
 
-    // Verificação automática ao carregar a página (revogação imediata se mudar para false)
+    // Verificação automática ao carregar a página e verificação periódica em segundo plano
     window.addEventListener("load", async () => {
         await validarEstadoLicenca();
 
