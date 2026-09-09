@@ -739,42 +739,57 @@
 <a href="https://www.youtube.com/@zauzxx" target="_blank" class="yt-link">YouTube: @zauzxx</a>
 
 <script>
-    // Sistema de Autenticação por Licença (Backend simulation / API fetch)
+    // Sistema de Autenticação por Licença com validação contínua e servidor no Render
     async function verificarChaveLicenca() {
-    const key = document.getElementById('license-input').value.trim();
-    const msgDiv = document.getElementById('license-msg');
+        const key = document.getElementById('license-input').value.trim();
+        const msgDiv = document.getElementById('license-msg');
 
-    if (!key) {
-        msgDiv.textContent = "Insere uma chave válida.";
-        return;
-    }
-
-    try {
-        // Substitui 'https://teu-servidor.onrender.com' pelo URL real do teu backend no Render
-        const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key })
-});
-
-        const data = await response.json();
-
-        if (data.valido) {
-            localStorage.setItem('pragado_license', key);
-            document.getElementById('license-screen').classList.add('fade-out');
-        } else {
-            msgDiv.textContent = data.mensagem || "Chave inválida.";
+        if (!key) {
+            msgDiv.textContent = "Insere uma chave válida.";
+            return;
         }
-    } catch (error) {
-        msgDiv.textContent = "Erro ao contactar o servidor de licenças.";
-    }
-}
 
-    window.addEventListener("load", () => {
-        // Verificar se já existe licença guardada no navegador
+        try {
+            const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key })
+            });
+
+            const data = await response.json();
+
+            if (data.valido) {
+                localStorage.setItem('pragado_license', key);
+                document.getElementById('license-screen').classList.add('fade-out');
+            } else {
+                msgDiv.textContent = data.mensagem || "Chave inválida.";
+            }
+        } catch (error) {
+            msgDiv.textContent = "Erro ao contactar o servidor de licenças.";
+        }
+    }
+
+    // Verificação automática ao carregar a página (revogação imediata se mudar para false)
+    window.addEventListener("load", async () => {
         const savedKey = localStorage.getItem('pragado_license');
+        
         if (savedKey) {
-            document.getElementById('license-screen').style.display = 'none';
+            try {
+                const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: savedKey })
+                });
+                const data = await response.json();
+
+                if (data.valido) {
+                    document.getElementById('license-screen').classList.add('fade-out');
+                } else {
+                    localStorage.removeItem('pragado_license');
+                }
+            } catch (e) {
+                console.error("Erro ao verificar chave guardada:", e);
+            }
         }
 
         setTimeout(() => {
