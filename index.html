@@ -1,1156 +1,750 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculadora dos Pragados</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@200;300;400;500;700&family=Pirata+One&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
-<style>
-@font-face {
-    font-family: 'Gothic War';
-    src: url('gothic-war.font') format('truetype'), url('gothic-war.ttf') format('truetype'), url('gothic-war.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora dos Pragados</title>
+    <style>
+        :root {
+            --bg-main: #0d1117;
+            --bg-card: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-hover: #1f6feb;
+            --danger: #da3633;
+        }
 
-    :root {
-        --bg: #0a0a0a;
-        --bg-vignette: #000000;
-        --panel: #151515;
-        --panel-alt: #202020;
-        --border: #444444;
-        --amber: #ffffff;
-        --amber-dim: #b8b8b8;
-        --rust: #777777;
-        --text: #f2f2f2;
-        --text-muted: #999999;
-        --lucro: #d0d0d0;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: var(--bg);
-    }
-    ::-webkit-scrollbar-thumb {
-        background: var(--border);
-        border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--amber-dim);
-    }
+        /* Ecrã de Licença / Bloqueio */
+        #license-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-main);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
 
-    body {
-        margin: 0;
-        min-height: 100vh;
-        background: radial-gradient(ellipse at top, #1a1a1a 0%, var(--bg) 45%, var(--bg-vignette) 100%);
-        color: var(--text);
-        font-family: 'Oswald', Arial, sans-serif;
-        font-weight: 300;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 28px 16px 80px;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
+        #license-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
 
-    #license-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: var(--bg);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        transition: opacity 0.8s ease, visibility 0.8s ease;
-    }
+        .license-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
 
-    #license-screen.fade-out {
-        opacity: 0;
-        visibility: hidden;
-    }
+        .license-card h2 {
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
 
-    .license-box {
-        background-color: var(--panel);
-        border: 1px solid var(--border);
-        padding: 30px;
-        border-radius: 6px;
-        text-align: center;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-    }
+        .license-card input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+        }
 
-    .license-box h3 {
-        font-family: 'Oswald', sans-serif;
-        font-size: 18px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--amber);
-        margin-top: 0;
-        margin-bottom: 15px;
-    }
+        .license-card button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
 
-    .license-box input {
-        margin-bottom: 15px;
-        text-align: center;
-        letter-spacing: 0.1em;
-    }
+        .license-card button:hover {
+            background-color: var(--accent-hover);
+        }
 
-    .license-msg {
-        margin-top: 12px;
-        font-size: 12px;
-        font-family: 'JetBrains Mono', monospace;
-        color: #ff5555;
-    }
+        .license-msg {
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--danger);
+        }
 
-    #intro-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: var(--bg);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        /* Container Principal da Aplicação */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin: 20px;
+        }
 
-    #intro-screen.fade-out {
-        opacity: 0;
-        visibility: hidden;
-    }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            gap: 10px;
+        }
 
-    .intro-title {
-        font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', 'Oswald', sans-serif;
-        font-weight: 100;
-        font-size: clamp(32px, 6vw, 64px);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #ffffff;
-        margin-bottom: 30px;
-        text-align: center;
-        text-shadow: 0 0 20px rgba(255,255,255,0.25);
-    }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
 
-    .intro-title span {
-        font-weight: 100;
-        color: #ffffff;
-    }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
 
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        border-top-color: var(--amber-dim);
-        border-radius: 50%;
-        animation: spin 1.2s linear infinite;
-    }
+        .content {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+        .content.active {
+            display: flex;
+            opacity: 1;
+        }
 
-    .masthead {
-        width: 100%;
-        max-width: 760px;
-        text-align: center;
-        margin-bottom: 22px;
-        position: relative;
-    }
-    .masthead .eyebrow {
-        font-family: 'JetBrains Mono', monospace;
-        letter-spacing: 0.35em;
-        font-size: 11px;
-        font-weight: 300;
-        color: var(--amber-dim);
-        text-transform: uppercase;
-    }
-    .masthead h1 {
-        font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', 'Oswald', sans-serif;
-        font-weight: 200;
-        font-size: 40px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        margin: 6px 0 4px;
-        color: var(--text);
-        text-shadow: 0 0 18px rgba(255,255,255,0.12);
-    }
-    .masthead h1 span { color: var(--amber); font-weight: 300; }
-    .masthead .sub {
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 300;
-        font-size: 12px;
-        color: var(--text-muted);
-        letter-spacing: 0.08em;
-    }
-    .masthead::after {
-        content: "";
-        display: block;
-        width: 120px;
-        height: 1px;
-        margin: 16px auto 0;
-        background: linear-gradient(90deg, transparent, var(--amber-dim), transparent);
-    }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
-    .tabs {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 18px;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-        max-width: 760px;
-    }
-    .tab {
-        flex: 1 1 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 10px;
-        background-color: var(--panel);
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        cursor: pointer;
-        border-radius: 3px;
-        font-size: 13px;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        font-weight: 300;
-        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease;
-        position: relative;
-        white-space: nowrap;
-    }
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
 
-    .tab .badge {
-        min-width: 26px;
-        height: 26px;
-        padding: 0 4px;
-        border-radius: 13px;
-        border: 1px solid currentColor;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        font-weight: 400;
-        flex-shrink: 0;
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .tab:hover {
-        color: var(--text);
-        border-color: var(--amber-dim);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    }
-    
-    .tab:hover .badge {
-        transform: scale(1.05);
-    }
+        input[type="text"] {
+            padding: 10px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 16px;
+        }
 
-    .tab.active {
-        background-color: var(--panel-alt);
-        border-color: var(--amber);
-        color: var(--amber);
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 6px 20px rgba(0,0,0,0.5);
-        font-weight: 400;
-    }
+        /* Custom Select estilizado */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+            width: 100%;
+        }
 
-    .content {
-        display: none;
-        opacity: 0;
-        transform: translateY(16px) scale(0.985);
-        flex-direction: column;
-        gap: 16px;
-        width: 100%;
-        max-width: 640px;
-        padding: 22px;
-        background-color: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.35);
-        transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .content.active {
-        display: flex;
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+        .custom-select {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 12px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-weight: 300;
-        color: var(--amber-dim);
-    }
+        .custom-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-top: 5px;
+            display: none;
+            z-index: 99;
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
-    input, button {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 4px;
-        border: 1px solid var(--border);
-        font-size: 15px;
-        background-color: var(--panel-alt);
-        color: var(--text);
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 300;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        .custom-select-wrapper.open .custom-options {
+            display: block;
+        }
 
-    .custom-select-wrapper {
-        position: relative;
-        user-select: none;
-        width: 100%;
-    }
+        .custom-option {
+            padding: 10px;
+            cursor: pointer;
+        }
 
-    .custom-select {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 14px;
-        border-radius: 4px;
-        border: 1px solid var(--border);
-        font-size: 15px;
-        background-color: var(--panel-alt);
-        color: var(--text);
-        font-family: 'Oswald', Arial, sans-serif;
-        font-weight: 300;
-        cursor: pointer;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        .custom-option:hover {
+            background-color: var(--border-color);
+        }
 
-    .custom-select:hover {
-        border-color: var(--amber-dim);
-        background-color: #262626;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
+        button.btn-calcular {
+            padding: 12px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-    .custom-select::after {
-        content: "";
-        width: 16px;
-        height: 16px;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-        background-repeat: no-repeat;
-        background-position: center;
-        transition: transform 0.3s ease;
-    }
+        button.btn-calcular:hover {
+            background-color: var(--accent-hover);
+        }
 
-    .custom-select.open::after {
-        transform: rotate(180deg);
-    }
+        .resultado {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
 
-    .custom-options {
-        position: absolute;
-        top: calc(100% + 4px);
-        left: 0;
-        right: 0;
-        background-color: var(--panel-alt);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        z-index: 99;
-        display: none;
-        max-height: 220px;
-        overflow-y: auto;
-    }
+        .material-composto {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
 
-    .custom-select-wrapper.open .custom-options { display: block; }
+        .lista-global {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
 
-    .custom-option {
-        padding: 12px 14px;
-        font-family: 'Oswald', Arial, sans-serif;
-        font-weight: 300;
-        font-size: 14px;
-        color: var(--text);
-        cursor: pointer;
-        transition: background 0.2s ease;
-    }
+        .lista-global h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
 
-    .custom-option:hover, .custom-option.selected {
-        background: linear-gradient(90deg, #2a2a2a, #222222) !important;
-        color: #ffffff !important;
-        box-shadow: inset 3px 0 0 var(--amber-dim);
-    }
+        .lista-global-conteudo {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            min-height: 60px;
+            font-size: 14px;
+        }
 
-    input:focus {
-        outline: none;
-        border-color: var(--amber);
-        box-shadow: 0 0 0 2px rgba(255,255,255,0.08), 0 4px 15px rgba(0,0,0,0.4);
-        transform: translateY(-1px);
-    }
+        .show-anim {
+            animation: fadeIn 0.4s ease forwards;
+        }
 
-    button {
-        font-family: 'Oswald', Arial, sans-serif;
-        background-color: var(--amber);
-        color: #080808;
-        cursor: pointer;
-        font-weight: 400;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-size: 14px;
-        border: none;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    button:hover {
-        background-color: #ffffff;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
-    }
-    
-    button:active {
-        transform: translateY(0) scale(0.98);
-        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
-    }
-
-    .result {
-        position: relative;
-        background: repeating-linear-gradient(135deg, var(--panel-alt), var(--panel-alt) 2px, #1b1b1b 2px, #1b1b1b 4px);
-        background-color: var(--panel-alt);
-        padding: 18px 20px;
-        border-radius: 4px;
-        border: 1px dashed var(--border);
-        min-height: 24px;
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 300;
-        font-size: 14px;
-        line-height: 1.9;
-        color: var(--text);
-        opacity: 0;
-        transform: translateY(12px);
-        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease;
-    }
-    
-    .result.show-anim {
-        opacity: 1;
-        transform: translateY(0);
-        border-color: var(--amber-dim);
-    }
-    
-    .result:empty { display: none; }
-    
-    .result strong {
-        color: var(--amber);
-        font-family: 'Oswald', Arial, sans-serif;
-        font-weight: 400;
-        letter-spacing: 0.03em;
-        display: block;
-        margin-bottom: 8px;
-        font-size: 13px;
-        text-transform: uppercase;
-    }
-    
-    .material-composto {
-        color: var(--text-muted);
-        font-size: 0.85em;
-        display: block;
-        margin: 2px 0 6px 14px;
-        border-left: 1px solid var(--border);
-        padding-left: 10px;
-    }
-
-    .global-list-container {
-        width: 100%;
-        max-width: 640px;
-        background-color: var(--panel);
-        border: 1px solid var(--amber-dim);
-        border-radius: 6px;
-        padding: 22px;
-        margin-top: 22px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-    }
-
-    .global-list-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 10px;
-    }
-
-    .global-list-header h3 {
-        margin: 0;
-        font-family: 'Oswald', Arial, sans-serif;
-        font-size: 16px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--amber);
-    }
-
-    .btn-limpar {
-        background-color: transparent;
-        color: #ff5555;
-        border: 1px solid #ff5555;
-        padding: 6px 12px;
-        font-size: 12px;
-        width: auto;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .btn-limpar:hover {
-        background-color: #ff5555;
-        color: #fff;
-        box-shadow: 0 0 10px rgba(255, 85, 85, 0.4);
-    }
-
-    .global-list-items {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 13px;
-        line-height: 1.8;
-        color: var(--text);
-        max-height: 250px;
-        overflow-y: auto;
-    }
-
-    .author-tag {
-        font-family: 'Gothic War', 'Pirata One', 'UnifrakturMaguntia', sans-serif;
-        font-weight: 200;
-        font-size: 18px;
-        color: var(--amber-dim);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-top: 14px;
-        opacity: 0.85;
-        text-shadow: 0 0 10px rgba(255,255,255,0.08);
-    }
-
-    .yt-link {
-        position: fixed;
-        bottom: 16px;
-        left: 16px;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 12px;
-        font-weight: 300;
-        color: var(--text-muted);
-        text-decoration: none;
-        letter-spacing: 0.08em;
-        z-index: 100;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        background-color: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .yt-link:hover {
-        color: var(--amber);
-        border-color: var(--amber-dim);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    }
-</style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
-<!-- Ecrã de Autenticação / Licença -->
-<div id="license-screen">
-    <div class="license-box">
-        <h3>Ativação do Produto</h3>
-        <input type="text" id="license-input" placeholder="Insere a tua key..."/>
-        <button onclick="verificarChaveLicenca()">Validar Chave</button>
-        <div class="license-msg" id="license-msg"></div>
+    <!-- Ecrã de Licença -->
+    <div id="license-screen">
+        <div class="license-card">
+            <h2>Ativar Licença</h2>
+            <input type="text" id="license-input" placeholder="Insere a tua chave aqui">
+            <button onclick="verificarChaveLicenca()">Validar Chave</button>
+            <div id="license-msg" class="license-msg"></div>
+        </div>
     </div>
-</div>
 
-<div id="intro-screen">
-    <div class="intro-title">calculadora <span>dos pragados</span></div>
-    <div class="spinner"></div>
-</div>
+    <!-- Aplicação Principal -->
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(0)">Balas</button>
+            <button class="tab" onclick="openTab(1)">Coletes</button>
+            <button class="tab" onclick="openTab(2)">Blueprints</button>
+            <button class="tab" onclick="openTab(3)">Acessórios</button>
+        </div>
 
-<div class="masthead">
-    <h1>calculadora <span>dos pragados</span></h1>
-    <div class="sub">calculadora de crafting & attachs</div>
-    <div class="author-tag">feito por zau</div>
-</div>
+        <!-- Aba 1: Balas -->
+        <div class="content active">
+            <div class="form-group">
+                <label>Tipo de Bala</label>
+                <div class="custom-select-wrapper" id="select-tipoBala">
+                    <div class="custom-select" data-value="9X19MM">9X19MM</div>
+                    <div class="custom-options">
+                        <div class="custom-option selected" data-value="9X19MM">9X19MM</div>
+                        <div class="custom-option" data-value="5.56MM">5.56MM</div>
+                        <div class="custom-option" data-value="7.62MM">7.62MM</div>
+                        <div class="custom-option" data-value=".50AE">.50AE</div>
+                        <div class="custom-option" data-value=".44 MAGNUM">.44 MAGNUM</div>
+                        <div class="custom-option" data-value=".38 LC">.38 LC</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Quantidade de Crafts (Caixas)</label>
+                <input type="text" id="quantidadeBala" value="1" oninput="formatarInput(this)">
+            </div>
+            <button class="btn-calcular" onclick="calcularBalas()">Calcular</button>
+            <div id="resultadoBalas" class="resultado">Calcula para ver os materiais...</div>
+        </div>
 
-<div class="tabs" role="tablist">
-    <div class="tab active" onclick="openTab(0)"><span class="badge">B</span>Balas</div>
-    <div class="tab" onclick="openTab(1)"><span class="badge">C</span>Coletes</div>
-    <div class="tab" onclick="openTab(2)"><span class="badge">BP</span>Blueprints</div>
-    <div class="tab" onclick="openTab(3)"><span class="badge">AT</span>Attachs</div>
-    <div class="tab" onclick="openTab(4)" style="flex: 1 1 100%;"><span class="badge">INV</span>Inventário</div>
-</div>
+        <!-- Aba 2: Coletes -->
+        <div class="content">
+            <div class="form-group">
+                <label>Quantidade de Coletes</label>
+                <input type="text" id="quantidadeColetes" value="1" oninput="formatarInput(this)">
+            </div>
+            <button class="btn-calcular" onclick="calcularColetes()">Calcular</button>
+            <div id="resultadoColetes" class="resultado">Calcula para ver os materiais...</div>
+        </div>
 
-<!-- Tab 0: Balas -->
-<div class="content active" id="tab-0">
-    <div>
-        <label>Tipo</label>
-        <div class="custom-select-wrapper" id="select-tipoBala">
-            <div class="custom-select" data-value="9X19MM">9X19MM</div>
-            <div class="custom-options">
-                <div class="custom-option selected" data-value="9X19MM">9X19 MM</div>
-                <div class="custom-option" data-value="5.56MM">5.56 MM</div>
-                <div class="custom-option" data-value="7.62MM">7.62 MM</div>
-                <div class="custom-option" data-value=".50AE">.50 AE</div>
-                <div class="custom-option" data-value=".44 MAGNUM">.44 MAGNUM</div>
-                <div class="custom-option" data-value=".38 LC">.38 LC</div>
+        <!-- Aba 3: Blueprints -->
+        <div class="content">
+            <div class="form-group">
+                <label>Tipo de Blueprint</label>
+                <div class="custom-select-wrapper" id="select-tipoBlueprint">
+                    <div class="custom-select" data-value="Leves">Blueprints leves</div>
+                    <div class="custom-options">
+                        <div class="custom-option selected" data-value="Leves">Blueprints leves</div>
+                        <div class="custom-option" data-value="Medias">Blueprints médias</div>
+                        <div class="custom-option" data-value="Pesadas">Blueprints pesadas</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Quantidade</label>
+                <input type="text" id="quantidadeBlueprint" value="1" oninput="formatarInput(this)">
+            </div>
+            <button class="btn-calcular" onclick="calcularBlueprint()">Calcular</button>
+            <div id="resultadoBlueprint" class="resultado">Calcula para ver os materiais...</div>
+        </div>
+
+        <!-- Aba 4: Acessórios -->
+        <div class="content">
+            <div class="form-group">
+                <label>Tipo de Acessório</label>
+                <div class="custom-select-wrapper" id="select-tipoAttach">
+                    <div class="custom-select" data-value="LanternaTatical">Lanterna Tática</div>
+                    <div class="custom-options">
+                        <div class="custom-option selected" data-value="LanternaTatical">Lanterna Tática</div>
+                        <div class="custom-option" data-value="Silenciador">Silenciador</div>
+                        <div class="custom-option" data-value="SilenciadorTatico">Silenciador Tático</div>
+                        <div class="custom-option" data-value="Grip">Grip</div>
+                        <div class="custom-option" data-value="CanoPesado">Cano Pesado</div>
+                        <div class="custom-option" data-value="CarregadorExtPistola">Carregador Ext. Pistola</div>
+                        <div class="custom-option" data-value="CarregadorExtSMG">Carregador Ext. SMG</div>
+                        <div class="custom-option" data-value="CarregadorExtRifle">Carregador Ext. Rifle</div>
+                        <div class="custom-option" data-value="TamborSMG">Tambor de SMG</div>
+                        <div class="custom-option" data-value="TamborRifle">Tambor de Rifle</div>
+                        <div class="custom-option" data-value="MiraMedia">Mira Média</div>
+                        <div class="custom-option" data-value="MiraGrande">Mira Grande</div>
+                        <div class="custom-option" data-value="BocaPrecisao">Boca de Precisão</div>
+                        <div class="custom-option" data-value="BocaTatica">Boca Tática</div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Quantidade Desejada</label>
+                <input type="text" id="quantidadeAttach" value="1" oninput="formatarInput(this)">
+            </div>
+            <button class="btn-calcular" onclick="calcularAttach()">Calcular</button>
+            <div id="resultadoAttach" class="resultado">Calcula para ver os materiais...</div>
+        </div>
+
+        <!-- Lista Global de Acumulação -->
+        <div class="lista-global">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3>Lista de Materiais Acumulados</h3>
+                <button onclick="limparListaGlobal()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 12px; font-weight: bold;">Limpar Lista</button>
+            </div>
+            <div id="listaGlobalConteudo" class="lista-global-conteudo">
+                <span style="color: var(--text-muted);">Nenhum material adicionado ainda. Faz um cálculo para acumular aqui.</span>
             </div>
         </div>
     </div>
-    <div>
-        <label for="quantidadeBala">Quantidade</label>
-        <input id="quantidadeBala" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularBalas()">Calcular</button>
-    <div class="result" id="resultadoBalas"></div>
-</div>
 
-<!-- Tab 1: Coletes -->
-<div class="content" id="tab-1">
-    <div>
-        <label>Colete</label>
-        <div class="custom-select-wrapper" id="select-tipoColetes">
-            <div class="custom-select" data-value="Coletes">Colete</div>
-            <div class="custom-options">
-                <div class="custom-option selected" data-value="Coletes">Colete</div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <label for="quantidadeColetes">Quantidade</label>
-        <input id="quantidadeColetes" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularColetes()">Calcular</button>
-    <div class="result" id="resultadoColetes"></div>
-</div>
-
-<!-- Tab 2: Blueprints -->
-<div class="content" id="tab-2">
-    <div>
-        <label>Tipo de blueprint</label>
-        <div class="custom-select-wrapper" id="select-tipoBlueprint">
-            <div class="custom-select" data-value="Leves">Blueprints leves</div>
-            <div class="custom-options">
-                <div class="custom-option selected" data-value="Leves">Blueprints leves</div>
-                <div class="custom-option" data-value="Medias">Blueprints médias</div>
-                <div class="custom-option" data-value="Pesadas">Blueprints pesadas</div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <label for="quantidadeBlueprint">Quantidade</label>
-        <input id="quantidadeBlueprint" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularBlueprint()">Calcular</button>
-    <div class="result" id="resultadoBlueprint"></div>
-</div>
-
-<!-- Tab 3: Attachs -->
-<div class="content" id="tab-3">
-    <div>
-        <label>Tipo de attach</label>
-        <div class="custom-select-wrapper" id="select-tipoAttach">
-            <div class="custom-select" data-value="LanternaTatical">Lanterna Tática</div>
-            <div class="custom-options">
-                <div class="custom-option selected" data-value="LanternaTatical">Lanterna Tática</div>
-                <div class="custom-option" data-value="Silenciador">Silenciador</div>
-                <div class="custom-option" data-value="SilenciadorTatico">Silenciador Tático</div>
-                <div class="custom-option" data-value="Grip">Grip</div>
-                <div class="custom-option" data-value="CanoPesado">Cano Pesado</div>
-                <div class="custom-option" data-value="CarregadorExtPistola">Carregador Ext. Pistola</div>
-                <div class="custom-option" data-value="CarregadorExtSMG">Carregador Ext. SMG</div>
-                <div class="custom-option" data-value="CarregadorExtRifle">Carregador Ext. Rifle</div>
-                <div class="custom-option" data-value="TamborSMG">Tambor de SMG</div>
-                <div class="custom-option" data-value="TamborRifle">Tambor de Rifle</div>
-                <div class="custom-option" data-value="MiraMedia">Mira Média</div>
-                <div class="custom-option" data-value="MiraGrande">Mira Grande</div>
-                <div class="custom-option" data-value="BocaPrecisao">Boca de Precisão</div>
-                <div class="custom-option" data-value="BocaTatica">Boca Tática</div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <label for="quantidadeAttach">Quantidade</label>
-        <input id="quantidadeAttach" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularAttach()">Calcular</button>
-    <div class="result" id="resultadoAttach"></div>
-</div>
-
-<!-- Tab 4: Crafts Inventário -->
-<div class="content" id="tab-4">
-    <div>
-        <label>Item de Inventário</label>
-        <div class="custom-select-wrapper" id="select-tipoInventario">
-            <div class="custom-select" data-value="Polvora">Pólvora</div>
-            <div class="custom-options">
-                <div class="custom-option selected" data-value="Polvora">Pólvora</div>
-                <div class="custom-option" data-value="Tecido">Tecido</div>
-                <div class="custom-option" data-value="Couro">Couro</div>
-                <div class="custom-option" data-value="Kevlar">Kevlar</div>
-                <div class="custom-option" data-value="Borracha">Borracha</div>
-                <div class="custom-option" data-value="Papel">Papel</div>
-                <div class="custom-option" data-value="TabuaMadeira">Tábua de Madeira</div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <label for="quantidadeInventario">Quantidade</label>
-        <input id="quantidadeInventario" type="text" value="1" oninput="formatarInput(this)" pattern="[0-9.]*"/>
-    </div>
-    <button onclick="calcularInventario()">Calcular</button>
-    <div class="result" id="resultadoInventario"></div>
-</div>
-
-<!-- Lista Acumulativa Consolidada -->
-<div class="global-list-container">
-    <div class="global-list-header">
-        <h3>Lista Acumulativa de Materiais</h3>
-        <button class="btn-limpar" onclick="limparListaGlobal()">Limpar Lista</button>
-    </div>
-    <div class="global-list-items" id="listaGlobalConteudo">
-        <span style="color: var(--text-muted);">Nenhum material adicionado ainda. Faz um cálculo para acumular aqui.</span>
-    </div>
-</div>
-
-<a href="https://www.youtube.com/@zauzxx" target="_blank" class="yt-link">YouTube: @zauzxx</a>
-
-<script>
-    // Sistema de Autenticação por Licença com validação contínua e servidor no Render
-    async function verificarChaveLicenca() {
-        const key = document.getElementById('license-input').value.trim();
-        const msgDiv = document.getElementById('license-msg');
-
-        if (!key) {
-            msgDiv.textContent = "Insere uma chave válida.";
-            return;
-        }
-
-        try {
-            const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key })
-            });
-
-            const data = await response.json();
-
-            if (data.valido) {
-                localStorage.setItem('pragado_license', key);
-                document.getElementById('license-screen').classList.add('fade-out');
-            } else {
-                msgDiv.textContent = data.mensagem || "Chave inválida.";
-            }
-        } catch (error) {
-            msgDiv.textContent = "Erro ao contactar o servidor de licenças.";
-        }
-    }
-
-    // Verificação automática ao carregar a página (revogação imediata se mudar para false)
-    window.addEventListener("load", async () => {
-        const savedKey = localStorage.getItem('pragado_license');
-        
-        if (savedKey) {
+    <!-- Script Principal de Segurança e Funcionalidades -->
+    <script>
+        async function validarChaveNoServidor(key) {
             try {
+                // Altera o URL para o teu domínio de produção (ex: Render, Heroku) ou localhost para testes
                 const response = await fetch('https://calculadora-gen-key.onrender.com/api/verificar-chave', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: savedKey })
+                    body: JSON.stringify({ key })
                 });
                 const data = await response.json();
+                return data.valido === true;
+            } catch (e) {
+                console.error("Erro de comunicação com o servidor de licenças:", e);
+                return false;
+            }
+        }
 
-                if (data.valido) {
+        async function verificarChaveLicenca() {
+            const keyInput = document.getElementById('license-input');
+            const key = keyInput.value.trim();
+            const msgDiv = document.getElementById('license-msg');
+
+            if (!key) {
+                msgDiv.textContent = "Insere uma chave válida.";
+                return;
+            }
+
+            msgDiv.textContent = "A validar...";
+            
+            const isValid = await validarChaveNoServidor(key);
+
+            if (isValid) {
+                localStorage.setItem('pragado_license', key);
+                document.getElementById('license-screen').classList.add('fade-out');
+                iniciarValidacaoContinua(key);
+            } else {
+                msgDiv.textContent = "Chave inválida, desativada ou já em uso noutros dispositivos.";
+            }
+        }
+
+        function iniciarValidacaoContinua(key) {
+            setInterval(async () => {
+                const isValid = await validarChaveNoServidor(key);
+                if (!isValid) {
+                    localStorage.removeItem('pragado_license');
+                    alert("A sua licença foi revogada, desativada ou expirou.");
+                    location.reload();
+                }
+            }, 30000); // Valida a cada 30 segundos em segundo plano
+        }
+
+        window.addEventListener("load", async () => {
+            const savedKey = localStorage.getItem('pragado_license');
+            
+            if (savedKey) {
+                const isValid = await validarChaveNoServidor(savedKey);
+                if (isValid) {
                     document.getElementById('license-screen').classList.add('fade-out');
+                    iniciarValidacaoContinua(savedKey);
                 } else {
                     localStorage.removeItem('pragado_license');
                 }
-            } catch (e) {
-                console.error("Erro ao verificar chave guardada:", e);
             }
-        }
-
-        setTimeout(() => {
-            const intro = document.getElementById("intro-screen");
-            if (intro) intro.classList.add("fade-out");
-        }, 1800);
-    });
-
-    let itensAcumuladosGlobal = [];
-
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll(".custom-select-wrapper").forEach(wrapper => {
-            const select = wrapper.querySelector(".custom-select");
-            const options = wrapper.querySelector(".custom-options");
-
-            select.addEventListener("click", (e) => {
-                e.stopPropagation();
-                document.querySelectorAll(".custom-select-wrapper").forEach(w => {
-                    if (w !== wrapper) {
-                        w.classList.remove("open");
-                        w.querySelector(".custom-select").classList.remove("open");
-                    }
-                });
-                wrapper.classList.toggle("open");
-                select.classList.toggle("open");
-            });
-
-            options.querySelectorAll(".custom-option").forEach(option => {
-                option.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    select.textContent = option.textContent;
-                    select.setAttribute("data-value", option.getAttribute("data-value"));
-                    
-                    options.querySelectorAll(".custom-option").forEach(opt => opt.classList.remove("selected"));
-                    option.classList.add("selected");
-
-                    wrapper.classList.remove("open");
-                    select.classList.remove("open");
-                });
-            });
         });
 
-        document.addEventListener("click", () => {
+        let itensAcumuladosGlobal = [];
+
+        document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".custom-select-wrapper").forEach(wrapper => {
-                wrapper.classList.remove("open");
-                wrapper.querySelector(".custom-select").classList.remove("open");
+                const select = wrapper.querySelector(".custom-select");
+                const options = wrapper.querySelector(".custom-options");
+
+                select.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll(".custom-select-wrapper").forEach(w => {
+                        if (w !== wrapper) {
+                            w.classList.remove("open");
+                            w.querySelector(".custom-select").classList.remove("open");
+                        }
+                    });
+                    wrapper.classList.toggle("open");
+                    select.classList.toggle("open");
+                });
+
+                options.querySelectorAll(".custom-option").forEach(option => {
+                    option.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        select.textContent = option.textContent;
+                        select.setAttribute("data-value", option.getAttribute("data-value"));
+                        
+                        options.querySelectorAll(".custom-option").forEach(opt => opt.classList.remove("selected"));
+                        option.classList.add("selected");
+
+                        wrapper.classList.remove("open");
+                        select.classList.remove("open");
+                    });
+                });
+            });
+
+            document.addEventListener("click", () => {
+                document.querySelectorAll(".custom-select-wrapper").forEach(wrapper => {
+                    wrapper.classList.remove("open");
+                    wrapper.querySelector(".custom-select").classList.remove("open");
+                });
             });
         });
 
-        document.querySelectorAll(".content").forEach((c, idx) => {
-            if (!c.classList.contains("active")) {
-                c.style.display = "none";
-            } else {
-                c.style.display = "flex";
-            }
-        });
-    });
-
-    function getCustomSelectValue(wrapperId) {
-        return document.querySelector(`#${wrapperId} .custom-select`).getAttribute("data-value");
-    }
-
-    function formatarNumero(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function formatarInput(input) {
-        const cursorPos = input.selectionStart - (input.value.length - input.value.replace(/\./g, '').length);
-        let valor = input.value.replace(/\./g, '');
-        if (valor.length > 0) {
-            input.value = formatarNumero(valor);
-        } else {
-            input.value = '';
+        function getCustomSelectValue(wrapperId) {
+            return document.querySelector(`#${wrapperId} .custom-select`).getAttribute("data-value");
         }
-        const pontosAntes = input.value.substring(0, cursorPos).split('.').length - 1;
-        input.setSelectionRange(cursorPos + pontosAntes, cursorPos + pontosAntes);
-    }
 
-    function parseNumber(str) {
-        return parseInt(str.replace(/\./g, '')) || 0;
-    }
+        function formatarNumero(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
 
-    function openTab(index) {
-        const tabs = document.querySelectorAll(".tab");
-        const contents = document.querySelectorAll(".content");
-        
-        if (tabs[index].classList.contains("active")) return;
+        function formatarInput(input) {
+            const cursorPos = input.selectionStart - (input.value.length - input.value.replace(/\./g, '').length);
+            let valor = input.value.replace(/\./g, '');
+            if (valor.length > 0) {
+                input.value = formatarNumero(valor);
+            } else {
+                input.value = '';
+            }
+            const pontosAntes = input.value.substring(0, cursorPos).split('.').length - 1;
+            input.setSelectionRange(cursorPos + pontosAntes, cursorPos + pontosAntes);
+        }
 
-        tabs.forEach(t => t.classList.remove("active"));
-        
-        const currentActiveContent = document.querySelector(".content.active");
-        if (currentActiveContent) {
-            currentActiveContent.classList.remove("active");
-            setTimeout(() => {
-                contents.forEach(c => c.style.display = "none");
+        function parseNumber(str) {
+            return parseInt(str.replace(/\./g, '')) || 0;
+        }
+
+        function openTab(index) {
+            const tabs = document.querySelectorAll(".tab");
+            const contents = document.querySelectorAll(".content");
+            
+            if (tabs[index].classList.contains("active")) return;
+
+            tabs.forEach(t => t.classList.remove("active"));
+            
+            const currentActiveContent = document.querySelector(".content.active");
+            if (currentActiveContent) {
+                currentActiveContent.classList.remove("active");
+                setTimeout(() => {
+                    contents.forEach(c => c.style.display = "none");
+                    contents[index].style.display = "flex";
+                    void contents[index].offsetWidth;
+                    contents[index].classList.add("active");
+                }, 350);
+            } else {
                 contents[index].style.display = "flex";
                 void contents[index].offsetWidth;
                 contents[index].classList.add("active");
-            }, 350);
-        } else {
-            contents[index].style.display = "flex";
-            void contents[index].offsetWidth;
-            contents[index].classList.add("active");
-        }
-        
-        tabs[index].classList.add("active");
-    }
-
-    const receitasBase = {
-        "Pólvora": { rendimento: 2, materiais: { "Salitre": 1, "Carvão": 1, "Enxofre": 2 } },
-        "Tecido": { rendimento: 5, materiais: { "Algodão": 10 } },
-        "Couro": { rendimento: 5, materiais: { "Pele de veado": 2 } },
-        "Kevlar": { rendimento: 2, materiais: { "Couro": 1, "Borracha": 5, "Tecido": 5 } },
-        "Borracha": { rendimento: 5, materiais: { "Látex": 10 } },
-        "Papel": { rendimento: 4, materiais: { "Tábua de Madeira": 2 } },
-        "Tábua de Madeira": { rendimento: 3, materiais: { "Madeira": 1 } }
-    };
-
-    function calcularSubMateriaisRecursivo(nomeItem, qtdNecessaria) {
-        if (!receitasBase[nomeItem]) return null;
-        const rec = receitasBase[nomeItem];
-        const crafts = Math.ceil(qtdNecessaria / rec.rendimento);
-        let subPartes = [];
-        for (const [subNome, subQtd] of Object.entries(rec.materiais)) {
-            const totalSub = subQtd * crafts;
-            const subDoSub = calcularSubMateriaisRecursivo(subNome, totalSub);
-            if (subDoSub) {
-                subPartes.push(`${formatarNumero(totalSub)} ${subNome.toLowerCase()} = <span class="material-composto">(${subDoSub})</span>`);
-            } else {
-                subPartes.push(`${formatarNumero(totalSub)} ${subNome.toLowerCase()}`);
             }
-        }
-        return subPartes.join(" + ");
-    }
-
-    function adicionarItemGlobal(textoHtml) {
-        itensAcumuladosGlobal.push(textoHtml);
-        atualizarVisualizacaoListaGlobal();
-    }
-
-    function limparListaGlobal() {
-        itensAcumuladosGlobal = [];
-        atualizarVisualizacaoListaGlobal();
-    }
-
-    function atualizarVisualizacaoListaGlobal() {
-        const container = document.getElementById("listaGlobalConteudo");
-
-        if (itensAcumuladosGlobal.length === 0) {
-            container.innerHTML = `<span style="color: var(--text-muted);">Nenhum material adicionado ainda. Faz um cálculo para acumular aqui.</span>`;
-            return;
+            
+            tabs[index].classList.add("active");
         }
 
-        container.innerHTML = itensAcumuladosGlobal.join("<br>");
-    }
+        const receitasBase = {
+            "Pólvora": { rendimento: 2, materiais: { "Salitre": 1, "Carvão": 1, "Enxofre": 2 } },
+            "Tecido": { rendimento: 5, materiais: { "Algodão": 10 } },
+            "Couro": { rendimento: 5, materiais: { "Pele de veado": 2 } },
+            "Kevlar": { rendimento: 2, materiais: { "Couro": 1, "Borracha": 5, "Tecido": 5 } },
+            "Borracha": { rendimento: 5, materiais: { "Látex": 10 } },
+            "Papel": { rendimento: 4, materiais: { "Tábua de Madeira": 2 } },
+            "Tábua de Madeira": { rendimento: 3, materiais: { "Madeira": 1 } }
+        };
 
-    function calcularBalas() {
-        const tipo = getCustomSelectValue("select-tipoBala");
-        const qtd = parseNumber(document.getElementById("quantidadeBala").value);
-
-        let texto = `<strong>Total para ${formatarNumero(60 * qtd)} balas ${tipo}</strong>`;
-        let subHtml = "";
-
-        if (tipo === "9X19MM") {
-            const polvQtd = 1 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(2 * qtd)} barra de cobre`;
-        } else if (tipo === "5.56MM") {
-            const polvQtd = 1 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(3 * qtd)} barra de cobre`;
-        } else if (tipo === "7.62MM") {
-            const polvQtd = 2 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
-        } else if (tipo === ".50AE") {
-            const polvQtd = 3 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(6 * qtd)} barra de cobre`;
-        } else if (tipo === ".44 MAGNUM") {
-            const polvQtd = 2 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
-        } else if (tipo === ".38 LC") {
-            const polvQtd = 2 * qtd;
-            const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
-            subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
-        }
-
-        texto += subHtml;
-        adicionarItemGlobal(texto);
-
-        let res = document.getElementById("resultadoBalas");
-        res.innerHTML = texto;
-        res.classList.remove("show-anim");
-        void res.offsetWidth;
-        res.classList.add("show-anim");
-    }
-
-    function calcularColetes() {
-        const qtd = parseNumber(document.getElementById("quantidadeColetes").value);
-        const kevlarQtd = 4 * qtd;
-        const subKevlar = calcularSubMateriaisRecursivo("Kevlar", kevlarQtd);
-
-        let texto = `<strong>Total para ${formatarNumero(qtd)} colete${qtd > 1 ? 's' : ''}</strong>` +
-                    `${formatarNumero(4 * qtd)}x Plástico<br>` +
-                    `${formatarNumero(kevlarQtd)}x Kevlar = <span class="material-composto">(${subKevlar})</span>`;
-
-        adicionarItemGlobal(texto);
-
-        let res = document.getElementById("resultadoColetes");
-        res.innerHTML = texto;
-        res.classList.remove("show-anim");
-        void res.offsetWidth;
-        res.classList.add("show-anim");
-    }
-
-    const materiaisBlueprints = {
-        Leves: { nome: "Blueprints leves", papel: 25, sujo: 50000 },
-        Medias: { nome: "Blueprints médias", papel: 50, sujo: 100000 },
-        Pesadas: { nome: "Blueprints pesadas", papel: 75, sujo: 200000 }
-    };
-
-    function calcularBlueprint() {
-        const tipo = getCustomSelectValue("select-tipoBlueprint");
-        const qtd = parseNumber(document.getElementById("quantidadeBlueprint").value);
-        const mat = materiaisBlueprints[tipo];
-        const papelQtd = mat.papel * qtd;
-        const subPapel = calcularSubMateriaisRecursivo("Papel", papelQtd);
-
-        let texto = `<strong>Total para ${formatarNumero(qtd)} ${mat.nome}</strong>` +
-                    `${formatarNumero(papelQtd)} papel = <span class="material-composto">(${subPapel})</span><br>` +
-                    `Dinheiro sujo: ${formatarNumero(mat.sujo * qtd)}`;
-
-        adicionarItemGlobal(texto);
-
-        let res = document.getElementById("resultadoBlueprint");
-        res.innerHTML = texto;
-        res.classList.remove("show-anim");
-        void res.offsetWidth;
-        res.classList.add("show-anim");
-    }
-
-    const materiaisAttachs = {
-        LanternaTatical: { nome: "Lanterna Tática", peso: 120, materiais: { "Eletrónicos": 1, "Chapa de Alumínio": 1, "Plástico": 2, "Parafuso": 2 } },
-        Silenciador: { nome: "Silenciador", peso: 280, materiais: { "Borracha": 1, "Plástico": 1, "Barra de Ferro": 1, "Parafuso": 2 } },
-        SilenciadorTatico: { nome: "Silenciador Tático", peso: 280, materiais: { "Chapa de Alumínio": 1, "Borracha": 2, "Parafuso": 2, "Barra de Ferro": 2 } },
-        Grip: { nome: "Grip", peso: 280, materiais: { "Borracha": 2, "Plástico": 2, "Parafuso": 2, "Barra de Ferro": 2 } },
-        CanoPesado: { nome: "Cano Pesado", peso: 280, materiais: { "Chapa de Alumínio": 1, "Barra de Ferro": 2, "Parafuso": 2 } },
-        CarregadorExtPistola: { nome: "Carregador Ext. Pistola", peso: 280, materiais: { "Barra de Ferro": 1, "Plástico": 2, "Parafuso": 2 } },
-        CarregadorExtSMG: { nome: "Carregador Ext. SMG", peso: 280, materiais: { "Aço": 1, "Barra de Ferro": 1, "Parafuso": 2 } },
-        CarregadorExtRifle: { nome: "Carregador Ext. Rifle", peso: 280, materiais: { "Aço": 1, "Barra de Cobre": 1, "Borracha": 2, "Barra de Ferro": 2 } },
-        TamborSMG: { nome: "Tambor de SMG", peso: 280, materiais: { "Aço": 1, "Parafuso": 2, "Barra de Ferro": 2 } },
-        TamborRifle: { nome: "Tambor de Rifle", peso: 280, materiais: { "Aço": 1, "Barra de Cobre": 1, "Borracha": 2, "Barra de Ferro": 2 } },
-        MiraMedia: { nome: "Mira Média", peso: 280, materiais: { "Barra de Ferro": 1, "Eletrónicos": 1, "Chapa de Alumínio": 1, "Plástico": 2, "Parafuso": 2 } },
-        MiraGrande: { nome: "Mira Grande", peso: 280, materiais: { "Eletrónicos": 1, "Plástico": 2, "Barra de Ferro": 2, "Chapa de Alumínio": 2, "Parafuso": 2 } },
-        BocaPrecisao: { nome: "Boca de Precisão", peso: 80, materiais: { "Aço": 1, "Chapa de Alumínio": 1, "Parafuso": 2 } },
-        BocaTatica: { nome: "Boca Tática", peso: 80, materiais: { "Aço": 1, "Chapa de Alumínio": 1, "Parafuso": 2 } }
-    };
-
-    function calcularAttach() {
-        const tipo = getCustomSelectValue("select-tipoAttach");
-        const qtdDesejada = parseNumber(document.getElementById("quantidadeAttach").value);
-        const mat = materiaisAttachs[tipo];
-        const resultado = document.getElementById("resultadoAttach");
-
-        if (qtdDesejada <= 0) {
-            resultado.innerHTML = "<strong>Quantidade inválida</strong>Introduza uma quantidade maior que 0.";
-            resultado.classList.remove("show-anim");
-            void resultado.offsetWidth;
-            resultado.classList.add("show-anim");
-            return;
-        }
-
-        const craftsNecessarios = Math.ceil(qtdDesejada / 2);
-        const quantidadeProduzida = craftsNecessarios * 2;
-
-        let texto = `<strong>Total para ${formatarNumero(quantidadeProduzida)}x ${mat.nome}</strong>`;
-        if (mat.materiais) {
-            let matsArr = [];
-            for (const [nome, quantidade] of Object.entries(mat.materiais)) {
-                const totalItem = quantidade * craftsNecessarios;
-                const subDoSub = calcularSubMateriaisRecursivo(nome, totalItem);
+        function calcularSubMateriaisRecursivo(nomeItem, qtdNecessaria) {
+            if (!receitasBase[nomeItem]) return null;
+            const rec = receitasBase[nomeItem];
+            const crafts = Math.ceil(qtdNecessaria / rec.rendimento);
+            let subPartes = [];
+            for (const [subNome, subQtd] of Object.entries(rec.materiais)) {
+                const totalSub = subQtd * crafts;
+                const subDoSub = calcularSubMateriaisRecursivo(subNome, totalSub);
                 if (subDoSub) {
-                    matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()} = <span class="material-composto">(${subDoSub})</span>`);
+                    subPartes.push(`${formatarNumero(totalSub)} ${subNome.toLowerCase()} = <span class="material-composto">(${subDoSub})</span>`);
                 } else {
-                    matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()}`);
+                    subPartes.push(`${formatarNumero(totalSub)} ${subNome.toLowerCase()}`);
                 }
             }
-            texto += `<span class="material-composto">${matsArr.join("<br>")}</span>`;
-        } else {
-            texto += `<span class="material-composto">(Receita indisponível)</span>`;
+            return subPartes.join(" + ");
         }
 
-        adicionarItemGlobal(texto);
+        function adicionarItemGlobal(textoHtml) {
+            itensAcumuladosGlobal.push(textoHtml);
+            atualizarVisualizacaoListaGlobal();
+        }
 
-        resultado.innerHTML = texto;
-        resultado.classList.remove("show-anim");
-        void resultado.offsetWidth;
-        resultado.classList.add("show-anim");
-    }
+        function limparListaGlobal() {
+            itensAcumuladosGlobal = [];
+            atualizarVisualizacaoListaGlobal();
+        }
 
-    const materiaisInventario = {
-        Polvora: { nome: "Pólvora", peso: 50, rendimento: 2, materiais: { "Salitre": 1, "Carvão": 1, "Enxofre": 2 } },
-        Tecido: { nome: "Tecido", peso: 300, rendimento: 5, materiais: { "Algodão": 10 } },
-        Couro: { nome: "Couro", peso: 700, rendimento: 5, materiais: { "Pele de veado": 2 } },
-        Kevlar: { nome: "Kevlar", peso: 15, rendimento: 2, materiais: { "Couro": 1, "Borracha": 5, "Tecido": 5 } },
-        Borracha: { nome: "Borracha", peso: 50, rendimento: 5, materiais: { "Látex": 10 } },
-        Papel: { nome: "Papel", peso: 100, rendimento: 4, materiais: { "Tábua de Madeira": 2 } },
-        TabuaMadeira: { nome: "Tábua de Madeira", peso: 100, rendimento: 3, materiais: { "Madeira": 1 } }
-    };
+        function atualizarVisualizacaoListaGlobal() {
+            const container = document.getElementById("listaGlobalConteudo");
+            if (itensAcumuladosGlobal.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted);">Nenhum material adicionado ainda. Faz um cálculo para acumular aqui.</span>`;
+                return;
+            }
+            container.innerHTML = itensAcumuladosGlobal.join("<br>");
+        }
 
-    function calcularInventario() {
-        const tipo = getCustomSelectValue("select-tipoInventario");
-        const qtdDesejada = parseNumber(document.getElementById("quantidadeInventario").value);
-        const mat = materiaisInventario[tipo];
-        const resultado = document.getElementById("resultadoInventario");
+        function calcularBalas() {
+            const tipo = getCustomSelectValue("select-tipoBala");
+            const qtd = parseNumber(document.getElementById("quantidadeBala").value);
 
-        if (qtdDesejada <= 0) {
-            resultado.innerHTML = "<strong>Quantidade inválida</strong>Introduza uma quantidade maior que 0.";
+            let texto = `<strong>Total para ${formatarNumero(60 * qtd)} balas ${tipo}</strong><br>`;
+            let subHtml = "";
+
+            if (tipo === "9X19MM") {
+                const polvQtd = 1 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(2 * qtd)} barra de cobre`;
+            } else if (tipo === "5.56MM") {
+                const polvQtd = 1 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(3 * qtd)} barra de cobre`;
+            } else if (tipo === "7.62MM") {
+                const polvQtd = 2 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
+            } else if (tipo === ".50AE") {
+                const polvQtd = 3 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(6 * qtd)} barra de cobre`;
+            } else if (tipo === ".44 MAGNUM") {
+                const polvQtd = 2 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
+            } else if (tipo === ".38 LC") {
+                const polvQtd = 2 * qtd;
+                const subPolv = calcularSubMateriaisRecursivo("Pólvora", polvQtd);
+                subHtml = `${formatarNumero(polvQtd)} pólvora = <span class="material-composto">(${subPolv})</span><br>${formatarNumero(4 * qtd)} barra de cobre`;
+            }
+
+            texto += subHtml;
+            adicionarItemGlobal(texto);
+
+            let res = document.getElementById("resultadoBalas");
+            res.innerHTML = texto;
+            res.classList.remove("show-anim");
+            void res.offsetWidth;
+            res.classList.add("show-anim");
+        }
+
+        function calcularColetes() {
+            const qtd = parseNumber(document.getElementById("quantidadeColetes").value);
+            const kevlarQtd = 4 * qtd;
+            const subKevlar = calcularSubMateriaisRecursivo("Kevlar", kevlarQtd);
+
+            let texto = `<strong>Total para ${formatarNumero(qtd)} colete${qtd > 1 ? 's' : ''}</strong><br>` +
+                        `${formatarNumero(4 * qtd)}x Plástico<br>` +
+                        `${formatarNumero(kevlarQtd)}x Kevlar = <span class="material-composto">(${subKevlar})</span>`;
+
+            adicionarItemGlobal(texto);
+
+            let res = document.getElementById("resultadoColetes");
+            res.innerHTML = texto;
+            res.classList.remove("show-anim");
+            void res.offsetWidth;
+            res.classList.add("show-anim");
+        }
+
+        const materiaisBlueprints = {
+            Leves: { nome: "Blueprints leves", papel: 25, sujo: 50000 },
+            Medias: { nome: "Blueprints médias", papel: 50, sujo: 100000 },
+            Pesadas: { nome: "Blueprints pesadas", papel: 75, sujo: 200000 }
+        };
+
+        function calcularBlueprint() {
+            const tipo = getCustomSelectValue("select-tipoBlueprint");
+            const qtd = parseNumber(document.getElementById("quantidadeBlueprint").value);
+            const mat = materiaisBlueprints[tipo];
+            const papelQtd = mat.papel * qtd;
+            const subPapel = calcularSubMateriaisRecursivo("Papel", papelQtd);
+
+            let texto = `<strong>Total para ${formatarNumero(qtd)} ${mat.nome}</strong><br>` +
+                        `${formatarNumero(papelQtd)} papel = <span class="material-composto">(${subPapel})</span><br>` +
+                        `Dinheiro sujo: ${formatarNumero(mat.sujo * qtd)}`;
+
+            adicionarItemGlobal(texto);
+
+            let res = document.getElementById("resultadoBlueprint");
+            res.innerHTML = texto;
+            res.classList.remove("show-anim");
+            void res.offsetWidth;
+            res.classList.add("show-anim");
+        }
+
+        const materiaisAttachs = {
+            LanternaTatical: { nome: "Lanterna Tática", materiais: { "Eletrónicos": 1, "Chapa de Alumínio": 1, "Plástico": 2, "Parafuso": 2 } },
+            Silenciador: { nome: "Silenciador", materiais: { "Borracha": 1, "Plástico": 1, "Barra de Ferro": 1, "Parafuso": 2 } },
+            SilenciadorTatico: { nome: "Silenciador Tático", materiais: { "Chapa de Alumínio": 1, "Borracha": 2, "Parafuso": 2, "Barra de Ferro": 2 } },
+            Grip: { nome: "Grip", materiais: { "Borracha": 2, "Plástico": 2, "Parafuso": 2, "Barra de Ferro": 2 } },
+            CanoPesado: { nome: "Cano Pesado", materiais: { "Chapa de Alumínio": 1, "Barra de Ferro": 2, "Parafuso": 2 } },
+            CarregadorExtPistola: { nome: "Carregador Ext. Pistola", materiais: { "Barra de Ferro": 1, "Plástico": 2, "Parafuso": 2 } },
+            CarregadorExtSMG: { nome: "Carregador Ext. SMG", materiais: { "Aço": 1, "Barra de Ferro": 1, "Parafuso": 2 } },
+            CarregadorExtRifle: { nome: "Carregador Ext. Rifle", materiais: { "Aço": 1, "Barra de Cobre": 1, "Borracha": 2, "Barra de Ferro": 2 } },
+            TamborSMG: { nome: "Tambor de SMG", materiais: { "Aço": 1, "Parafuso": 2, "Barra de Ferro": 2 } },
+            TamborRifle: { nome: "Tambor de Rifle", materiais: { "Aço": 1, "Barra de Cobre": 1, "Borracha": 2, "Barra de Ferro": 2 } },
+            MiraMedia: { nome: "Mira Média", materiais: { "Barra de Ferro": 1, "Eletrónicos": 1, "Chapa de Alumínio": 1, "Plástico": 2, "Parafuso": 2 } },
+            MiraGrande: { nome: "Mira Grande", materiais: { "Eletrónicos": 1, "Plástico": 2, "Barra de Ferro": 2, "Chapa de Alumínio": 2, "Parafuso": 2 } },
+            BocaPrecisao: { nome: "Boca de Precisão", materiais: { "Aço": 1, "Chapa de Alumínio": 1, "Parafuso": 2 } },
+            BocaTatica: { nome: "Boca Tática", materiais: { "Aço": 1, "Chapa de Alumínio": 1, "Parafuso": 2 } }
+        };
+
+        function calcularAttach() {
+            const tipo = getCustomSelectValue("select-tipoAttach");
+            const qtdDesejada = parseNumber(document.getElementById("quantidadeAttach").value);
+            const mat = materiaisAttachs[tipo];
+            const resultado = document.getElementById("resultadoAttach");
+
+            if (qtdDesejada <= 0) {
+                resultado.innerHTML = "<strong>Quantidade inválida</strong><br>Introduza uma quantidade maior que 0.";
+                resultado.classList.remove("show-anim");
+                void resultado.offsetWidth;
+                resultado.classList.add("show-anim");
+                return;
+            }
+
+            const craftsNecessarios = Math.ceil(qtdDesejada / 2);
+            const quantidadeProduzida = craftsNecessarios * 2;
+
+            let texto = `<strong>Total para ${formatarNumero(quantidadeProduzida)}x ${mat.nome}</strong><br>`;
+            if (mat.materiais) {
+                let matsArr = [];
+                for (const [nome, quantidade] of Object.entries(mat.materiais)) {
+                    const totalItem = quantidade * craftsNecessarios;
+                    const subDoSub = calcularSubMateriaisRecursivo(nome, totalItem);
+                    if (subDoSub) {
+                        matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()} = <span class="material-composto">(${subDoSub})</span>`);
+                    } else {
+                        matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()}`);
+                    }
+                }
+                texto += matsArr.join("<br>");
+            }
+
+            adicionarItemGlobal(texto);
+
+            resultado.innerHTML = texto;
             resultado.classList.remove("show-anim");
             void resultado.offsetWidth;
             resultado.classList.add("show-anim");
-            return;
         }
-
-        const craftsNecessarios = Math.ceil(qtdDesejada / mat.rendimento);
-        const quantidadeProduzida = craftsNecessarios * mat.rendimento;
-
-        let texto = `<strong>${formatarNumero(quantidadeProduzida)}x ${mat.nome} =</strong>`;
-        let matsArr = [];
-        for (const [nome, quantidade] of Object.entries(mat.materiais)) {
-            const totalItem = quantidade * craftsNecessarios;
-            const subDoSub = calcularSubMateriaisRecursivo(nome, totalItem);
-            if (subDoSub) {
-                matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()} = <span class="material-composto">(${subDoSub})</span>`);
-            } else {
-                matsArr.push(`${formatarNumero(totalItem)} ${nome.toLowerCase()}`);
-            }
-        }
-        texto += `<span class="material-composto">${matsArr.join("<br>")}</span>`;
-
-        adicionarItemGlobal(texto);
-
-        resultado.innerHTML = texto;
-        resultado.classList.remove("show-anim");
-        void resultado.offsetWidth;
-        resultado.classList.add("show-anim");
-    }
-</script>
-
-<script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('keydown', e => {
-        if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-            e.preventDefault();
-            return false;
-        }
-    });
-    document.addEventListener('dragstart', e => e.preventDefault());
-</script>
-
+    </script>
 </body>
 </html>
